@@ -1,0 +1,130 @@
+{
+  "build_id": "???",
+  "initramfs": {
+    "goget": [
+      {
+        "label": "uroot",
+        "pkg": "https://github.com/u-root/u-root",
+        "branch": "master",
+        "hash": "60aeb0ab57dfac6e19f057de0b3e25793ede1616"
+      }
+    ],
+    "untar": [
+      {
+        "label": "go",
+        "url": "https://golang.org/dl/go1.15.linux-amd64.tar.gz",
+        "hash": "sha256:2d75848ac606061efe52a8068d0e647b35ce487a15bb52272c427df485193602"
+      }
+    ]
+  },
+  "kernel": {
+    "untar": [
+      {
+        "label": "kernel",
+        "url": "file://blobs/linux-v5.2-fbk3.tar.gz",
+        "hash": "sha256:5c4d5b16a3b48e49ce787ff1070d13415a41b5455de6cd9b248aaad120102192"
+      }
+    ]
+  },
+  "coreboot": {
+    "git": [
+      {
+        "label": "coreboot",
+        "url": "https://github.com/facebookexternal/osf-partner-coreboot",
+        "branch": "master",
+        "hash": "4dfdce4223e9689d230809b64178af4af60b0dd6"
+      },
+      {
+        "label": "blobs",
+        "url": "git@github.com:facebookexternal/osf-partner-blobs",
+        "dest": "3rdparty/blobs",
+        "branch": "fb",
+        "hash": "3b1818e33f7847806a632e00665e4b2d8387047a"
+      },
+      {
+        "label": "fsp",
+        "url": "git@github.com:facebookexternal/osf-partner-fsp",
+        "dest": "3rdparty/fsp",
+        "branch": "fb",
+        "hash": "92da76916ff00e76a92bd1f31de5dc22bb72b6f5"
+      },
+      {
+        "label": "vboot",
+        "url": "https://review.coreboot.org/vboot",
+        "dest": "3rdparty/vboot",
+        "branch": "master",
+        "hash": "ed23c08440dae6657d026a30b504578e03e0426f"
+      }
+    ],
+    "files": {
+      "label": "crossgcc_tarballs",
+      "dest": "util/crossgcc/tarballs",
+      "filelist": [
+        {
+          "url": "https://ftpmirror.gnu.org/gmp/gmp-6.1.2.tar.xz",
+          "hash": "sha256:87b565e89a9a684fe4ebeeddb8399dce2599f9c9049854ca8c0dfbdea0e21912"
+        },
+        {
+          "url": "https://ftpmirror.gnu.org/mpfr/mpfr-4.0.2.tar.xz",
+          "hash": "sha256:1d3be708604eae0e42d578ba93b390c2a145f17743a744d8f3f8c2ad5855a38a"
+        },
+        {
+          "url": "https://ftpmirror.gnu.org/mpc/mpc-1.1.0.tar.gz",
+          "hash": "sha256:6985c538143c1208dcb1ac42cedad6ff52e267b47e5f970183a3e75125b43c2e"
+        },
+        {
+          "url": "https://ftpmirror.gnu.org/gcc/gcc-8.3.0/gcc-8.3.0.tar.xz",
+          "hash": "sha256:64baadfe6cc0f4947a84cb12d7f0dfaf45bb58b7e92461639596c21e02d97d2c"
+        },
+        {
+          "url": "https://ftpmirror.gnu.org/binutils/binutils-2.33.1.tar.xz",
+          "hash": "sha256:ab66fc2d1c3ec0359b8e08843c9f33b63e8707efdff5e4cc5c200eae24722cbf"
+        },
+        {
+          "url": "https://ftpmirror.gnu.org/gdb/gdb-9.2.tar.xz",
+          "hash": "sha256:360cd7ae79b776988e89d8f9a01c985d0b1fa21c767a4295e5f88cb49175c555"
+        },
+        {
+          "url": "https://acpica.org/sites/acpica/files/acpica-unix2-20200528.tar.gz",
+          "hash": "sha256:ad8a7b1571ec94d8c1837cf0c89ff33ea820780362fbb3e26adbde96beed5205"
+        },
+        {
+          "url": "https://www.python.org/ftp/python/3.8.1/Python-3.8.1.tar.xz",
+          "hash": "sha256:75894117f6db7051c1b34f37410168844bbb357c139a8a10a352e9bf8be594e8"
+        },
+        {
+          "url": "https://downloads.sourceforge.net/sourceforge/expat/expat-2.2.9.tar.bz2",
+          "hash": "sha256:f1063084dc4302a427dabcca499c8312b3a32a29b7d2506653ecc8f950a9a237"
+        },
+        {
+          "url": "https://releases.llvm.org/9.0.0/llvm-9.0.0.src.tar.xz",
+          "hash": "sha256:d6a0565cf21f22e9b4353b2eb92622e8365000a9e90a16b09b56f8157eabfe84"
+        },
+        {
+          "url": "https://releases.llvm.org/9.0.0/cfe-9.0.0.src.tar.xz",
+          "hash": "sha256:7ba81eef7c22ca5da688fdf9d88c20934d2d6b40bfe150ffd338900890aa4610"
+        },
+        {
+          "url": "https://releases.llvm.org/9.0.0/compiler-rt-9.0.0.src.tar.xz",
+          "hash": "sha256:56e4cd96dd1d8c346b07b4d6b255f976570c6f2389697347a6c3dcb9e820d10e"
+        },
+        {
+          "url": "https://releases.llvm.org/9.0.0/clang-tools-extra-9.0.0.src.tar.xz",
+          "hash": "sha256:ea1c86ce352992d7b6f6649bc622f6a2707b9f8b7153e9f9181a35c76aa3ac10"
+        },
+        {
+          "url": "https://ftpmirror.gnu.org/make/make-4.2.1.tar.bz2",
+          "hash": "sha256:d6e262bf3601b42d2b1e4ef8310029e1dcf20083c5446b4b7aa67081fdffc589"
+        },
+        {
+          "url": "https://cmake.org/files/v3.16/cmake-3.16.2.tar.gz",
+          "hash": "sha256:8c09786ec60ca2be354c29829072c38113de9184f29928eb9da8446a5f2ce6a9"
+        },
+        {
+          "url": "https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/nasm-2.14.02.tar.bz2",
+          "hash": "sha256:34fd26c70a277a9fdd54cb5ecf389badedaf48047b269d1008fbc819b24e80bc"
+        }
+      ]
+    }
+  }
+}
