@@ -14,9 +14,9 @@
 # CONFIGDIR=/path/to/dir: optional, path to where config-$PLATFORM.json is
 #     located. Default: ${scriptdir}/configs/
 # VER=<overall firmware version>: optional, effective for deltalake
-# KM_PATH=<path to KM private key>: optional, effective for deltalake-dvt
+# KM_PRIV_KEY_PATH=<path to KM private key>: optional, effective for deltalake-dvt
 # ODM_PRIV_KEY_PATH=<path to ODM private key>: optional, effective for deltalake-dvt
-#     KM_PATH and ODM_PRIV_KEY_PAH need to be provided together, if neither KM_PATH nor
+#     KM_PRIV_KEY_PATH and ODM_PRIV_KEY_PAH need to be provided together, if neither KM_PRIV_KEY_PATH nor
 # ODM_PRIV_KEY_PATH is provided for deltalake-dvt, it would use the default test keys
 #     under cbnt to sign coreboot image.
 
@@ -30,7 +30,7 @@ scriptdir="$(realpath "$(dirname "$0")")"
 
 CONFIGDIR=${CONFIGDIR:-${scriptdir}/configs/}
 HASH="${HASH:-strict}"
-KM_PATH=${KM_PATH:-""}
+KM_PRIV_KEY_PATH=${KM_PRIV_KEY_PATH:-""}
 ODM_PRIV_KEY_PATH=${ODM_PRIV_KEY_PATH:-""}
 
 # Path to the getdeps executable. If not specified, it will be
@@ -58,17 +58,17 @@ fi
 "${scriptdir}/build-coreboot.sh"
 if [ "$PLATFORM" = "deltalake-dvt" ]
 then
-  if [ -z "$KM_PATH" ] && [ -z "$ODM_PRIV_KEY_PATH" ]
+  if [ -z "$KM_PRIV_KEY_PATH" ] && [ -z "$ODM_PRIV_KEY_PATH" ]
   then
-    KM_PATH="cbnt/km_test_priv_key.pem"
+    KM_PRIV_KEY_PATH="cbnt/km_test_priv_key.pem"
     ODM_PRIV_KEY_PATH="cbnt/bpm_test_priv_key.pem"
-    echo "Use default test keys $KM_PATH and $ODM_PRIV_KEY_PATH"
-  elif [ -z "$KM_PATH" ] || [ -z "$ODM_PRIV_KEY_PATH" ]
+    echo "Use default test keys $KM_PRIV_KEY_PATH and $ODM_PRIV_KEY_PATH"
+  elif [ -z "$KM_PRIV_KEY_PATH" ] || [ -z "$ODM_PRIV_KEY_PATH" ]
   then
-    echo "Both KM_PATH and ODM_PRIV_KEY_PATH environment variables must be set."
+    echo "Both KM_PRIV_KEY_PATH and ODM_PRIV_KEY_PATH environment variables must be set."
     exit 1
   else
-    echo "Use provided keys $KM_PATH and $ODM_PRIV_KEY_PATH"
+    echo "Use provided keys $KM_PRIV_KEY_PATH and $ODM_PRIV_KEY_PATH"
   fi
-  PLATFORM=$PLATFORM KM_PATH=$KM_PATH ODM_PRIV_KEY_PATH=$ODM_PRIV_KEY_PATH ./build_cbnt.sh
+  PLATFORM=$PLATFORM KM_PRIV_KEY_PATH=$KM_PRIV_KEY_PATH ODM_PRIV_KEY_PATH=$ODM_PRIV_KEY_PATH ./build-cbnt.sh
 fi

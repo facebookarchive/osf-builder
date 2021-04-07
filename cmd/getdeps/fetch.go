@@ -14,6 +14,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"strings"
 )
@@ -82,24 +83,30 @@ func fetch(label, urlStr string) ([]byte, error) {
 	return data, nil
 }
 
-func fetchAndVerify(label, projectDir, urlStr string, hashMode HashMode, hash *string, urlOverrides *URLOverrides) ([]byte, error) {
+func fetchAndVerify(label, projectDir, urlStr string, hashMode HashMode, hash *string, urlOverrides *URLOverrides) ([]byte, os.FileInfo, error) {
 	if urlOverrides != nil {
 		urlStr = urlOverrides.Override(urlStr)
 	}
 
 	u, err := url.Parse(urlStr)
 	if err != nil {
-		return nil, fmt.Errorf("%s: invalid URL %q: %w", label, urlStr, err)
+		return nil, nil, fmt.Errorf("%s: invalid URL %q: %w", label, urlStr, err)
 	}
 
 	if strings.ToLower(u.Scheme) == "file" {
-		return ioutil.ReadFile(path.Join(projectDir, u.Host, u.Path))
+		filePath := path.Join(projectDir, u.Host, u.Path)
+		fileInfo, err := os.Stat(filePath)
+		if err != nil {
+			return nil, nil, err
+		}
+		data, err := ioutil.ReadFile(filePath)
+		return data, fileInfo, err
 	}
 
 	switch hashMode {
 	case hashModeStrict:
 		if hash == nil || *hash == "" {
-			return nil, fmt.Errorf("%s: %s: hash mode is strict and no hash supplied", label, urlStr)
+			return nil, nil, fmt.Errorf("%s: %s: hash mode is strict and no hash supplied", label, urlStr)
 		}
 	case hashModeUpdate:
 		if hash != nil {
@@ -120,7 +127,7 @@ func fetchAndVerify(label, projectDir, urlStr string, hashMode HashMode, hash *s
 		for attempts := 0; attempts < 3; attempts++ {
 			data, err = fetch(label, urlStr)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			actualHash, err = verifyHash(data, *hash)
 			if err != nil {
@@ -133,15 +140,16 @@ func fetchAndVerify(label, projectDir, urlStr string, hashMode HashMode, hash *s
 			} else {
 				log.Printf("%s: Hash %s (verified)", label, actualHash)
 			}
-			return data, nil
+			return data, nil, nil
 		}
 
 		// at this point err is `nil` if the last attempt was successful,
 		// and not `nil` otherwise.
-		return data, err
+		return data, nil, err
 	}
 
-	return fetch(label, urlStr)
+	data, err = fetch(label, urlStr)
+	return data, nil, err
 }
 
 func verifyHash(data []byte, expectedHash string) (string, error) {

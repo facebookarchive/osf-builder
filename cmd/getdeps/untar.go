@@ -23,7 +23,8 @@ type Untar struct {
 
 // Get downloads a tar.gz file and uncompresses it
 func (pkg *Untar) Get(projectDir string, urlOverrides *URLOverrides, hashMode HashMode) error {
-	data, err := fetchAndVerify(pkg.Label, projectDir, pkg.URL, hashMode, &pkg.Hash, urlOverrides)
+	// ignore file info, will use permissions from the tar metadata
+	data, _, err := fetchAndVerify(pkg.Label, projectDir, pkg.URL, hashMode, &pkg.Hash, urlOverrides)
 	if err != nil {
 		return err
 	}

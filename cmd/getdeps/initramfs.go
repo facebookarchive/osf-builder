@@ -14,6 +14,7 @@ import (
 type Initramfs struct {
 	Goget []Gopkg `json:"goget"`
 	Untar []Untar `json:"untar"`
+	Files Files   `json:"files"`
 }
 
 // Get downloads the sources to build the initramfs
@@ -29,6 +30,9 @@ func (ir *Initramfs) Get(projectDir string, urlOverrides *URLOverrides, hashMode
 			return err
 		}
 		ir.Untar[i] = u
+	}
+	if err := ir.Files.Get(projectDir, urlOverrides, hashMode); err != nil {
+		return err
 	}
 	return nil
 }

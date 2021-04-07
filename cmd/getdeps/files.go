@@ -36,7 +36,7 @@ func (ff *Files) Get(projectDir string, urlOverrides *URLOverrides, hashMode Has
 
 		name := path.Base(u.Path)
 
-		bytes, err := fetchAndVerify(ff.Label, projectDir, f.URL, hashMode, &f.Hash, urlOverrides)
+		bytes, fileInfo, err := fetchAndVerify(ff.Label, projectDir, f.URL, hashMode, &f.Hash, urlOverrides)
 		if err != nil {
 			return fmt.Errorf("%s: %s: %w", ff.Label, name, err)
 		}
@@ -46,7 +46,11 @@ func (ff *Files) Get(projectDir string, urlOverrides *URLOverrides, hashMode Has
 		}
 
 		path := path.Join(ff.Dest, name)
-		if err = ioutil.WriteFile(path, bytes, 0644); err != nil {
+		perms := os.FileMode(0644)
+		if fileInfo != nil {
+			perms = fileInfo.Mode()
+		}
+		if err = ioutil.WriteFile(path, bytes, perms); err != nil {
 			return err
 		}
 
