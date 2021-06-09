@@ -56,19 +56,3 @@ fi
 # Build coreboot and then Linuxboot FW image
 "${GETDEPS}" --components coreboot -c "${CONFIGDIR}/config-${PLATFORM}.json" -H "$HASH"
 "${scriptdir}/build-coreboot.sh"
-if [ "$PLATFORM" = "deltalake-dvt" ]
-then
-  if [ -z "$KM_PRIV_KEY_PATH" ] && [ -z "$ODM_PRIV_KEY_PATH" ]
-  then
-    KM_PRIV_KEY_PATH="cbnt/km_test_priv_key.pem"
-    ODM_PRIV_KEY_PATH="cbnt/bpm_test_priv_key.pem"
-    echo "Use default test keys $KM_PRIV_KEY_PATH and $ODM_PRIV_KEY_PATH"
-  elif [ -z "$KM_PRIV_KEY_PATH" ] || [ -z "$ODM_PRIV_KEY_PATH" ]
-  then
-    echo "Both KM_PRIV_KEY_PATH and ODM_PRIV_KEY_PATH environment variables must be set."
-    exit 1
-  else
-    echo "Use provided keys $KM_PRIV_KEY_PATH and $ODM_PRIV_KEY_PATH"
-  fi
-  PLATFORM=$PLATFORM KM_PRIV_KEY_PATH=$KM_PRIV_KEY_PATH ODM_PRIV_KEY_PATH=$ODM_PRIV_KEY_PATH ./build-cbnt.sh
-fi
