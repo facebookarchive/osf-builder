@@ -1,5 +1,10 @@
 {
   "includes": [
     "flat_config.json"
-  ]
+  ],
+  "coreboot": {
+    "git": [
+      { "label": "coreboot", "hash": "" }
+    ]
+  }
 }

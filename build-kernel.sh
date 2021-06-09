@@ -31,9 +31,9 @@ if ! lzma -h > /dev/null 2>/dev/null; then
   exit 1
 fi
 
-make --quiet clean CFLAGS="-w -Os"
-timeout 10 make --quiet olddefconfig CFLAGS="-w -Os"
-make --quiet -j$((num_cores+1)) CFLAGS="-w -Os"
+make clean
+timeout 60 make olddefconfig
+make -j$((num_cores+1)) KCFLAGS="-pipe"
 
 cp "${kernel_image}" "${OUT}"
 

@@ -4,7 +4,6 @@
 
 scriptdir="$(realpath "$(dirname "$0")")"
 OUT=${OUT:-"initramfs_linuxboot.amd64.cpio"}
-patchdir=${PATCHDIR:-${scriptdir}/patches}
 
 pushd initramfs
 export PATH="${PWD}/go/bin:${PATH}"
@@ -24,7 +23,7 @@ fi
 export GOPATH
 
 # Apply patches.
-for p in "${patchdir}"/initramfs-*.patch; do
+for p in "${scriptdir}"/patches/initramfs-*.patch; do
   p=$(realpath $p)
   echo "Applying patch: $p"
   patch -d gopath/src/github.com/u-root/u-root -p 1 -b < "$p"
@@ -95,11 +94,11 @@ then
 fi
 
 flags=("${flags[@]}"
-  "-files" "$(readlink -f "${scriptdir}"/resources/flashrom):bin/flashrom"
-  "-files" "$(readlink -f "${scriptdir}"/resources/vpd):bin/vpd"
-#  "-files" "$(readlink -f "${scriptdir}"/resources/vpd_r.sh):bin/vpd_r.sh"
-#  "-files" "$(readlink -f "${scriptdir}"/resources/vpd_w.sh):bin/vpd_w.sh"
-#  "-files" "$(readlink -f "${scriptdir}"/resources/ca.pem):etc/cacerts.pem"
+  "-files" "$(readlink -f "${scriptdir}"/linuxboot-artifacts/flashrom):bin/flashrom"
+  "-files" "$(readlink -f "${scriptdir}"/linuxboot-artifacts/vpd):bin/vpd"
+  "-files" "$(readlink -f "${scriptdir}"/linuxboot-artifacts/vpd_r.sh):bin/vpd_r.sh"
+  "-files" "$(readlink -f "${scriptdir}"/linuxboot-artifacts/vpd_w.sh):bin/vpd_w.sh"
+  "-files" "$(readlink -f "${scriptdir}"/linuxboot-artifacts/ca.pem):etc/cacerts.pem"
 )
 
 for cmd in "${base_cmds[@]}"

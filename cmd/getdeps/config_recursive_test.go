@@ -21,13 +21,19 @@ var (
 func TestNewConfigWithIncludesRecursive(t *testing.T) {
 	data, err := ioutil.ReadFile(testRecursiveConfig)
 	require.NoError(t, err)
-	_, err = NewConfigWithIncludes(data, "testdata")
+	config, err := NewConfigWithIncludes(data, "testdata")
 	require.NoError(t, err)
+	require.Equal(t, 1, len(config.Coreboot.Git))
+	require.NotNil(t, config.Coreboot.Git[0].Branch)
+	require.Equal(t, "master", *config.Coreboot.Git[0].Branch)
+	// Hash gets overridden in recursive_config.json.
+	require.Nil(t, config.Coreboot.Git[0].Hash)
 }
 
 func TestNewConfigWithIncludesInfiniteRecursion(t *testing.T) {
 	data, err := ioutil.ReadFile(testInfiniteRecursiveConfig)
 	require.NoError(t, err)
-	_, err = NewConfigWithIncludes(data, "testdata")
+	config, err := NewConfigWithIncludes(data, "testdata")
 	require.Error(t, err)
+	require.Nil(t, config)
 }

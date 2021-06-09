@@ -16,11 +16,6 @@
 # KERNEL=~/fbcode/buck-out/gen/osf/linuxboot/uroot-x86_64-outputs__srcs/kernel-source/arch/x86/boot/bzImage \
 # ./build-coreboot.sh
 #
-# Optional variables:
-# OUT: path to the output file. Default: coreboot-${PLATFORM}.rom
-# PATCHDIR: path to the directory containing patch files. Each patch file name
-#     has to end with ".patch" in order to be picked
-#
 # Remember to rebuild the kernel and ramfs in case you are making local changes:
 #   buck build //osf/linuxboot:kernel
 
@@ -29,11 +24,11 @@ set -e -x -u
 scriptdir="$(realpath "$(dirname "$0")")"
 OUT=${OUT:-"coreboot-${PLATFORM}.rom"}
 config="${scriptdir}/linuxboot-artifacts/coreboot-config-${PLATFORM}"
-patchdir=${PATCHDIR:-${scriptdir}}
-patches="${patchdir}/coreboot-${PLATFORM}-*.patch"
+patches="${scriptdir}/patches/coreboot-${PLATFORM}-*.patch"
 KERNEL=${KERNEL:-"${PWD}/kernel/linuxboot_uroot_ttys0"}
 VER=${VER:-"0.0.0"}
 VPD=${VPD:-"${scriptdir}/linuxboot-artifacts/vpd"}
+BGPROV_BIN=${BGPROV_BIN:-"${scriptdir}/linuxboot-artifacts/bg-prov"}
 
 pushd coreboot
 
@@ -78,18 +73,26 @@ setup_crossgcc()
     echo "${crossgcc_dir}/xgcc exists, assuming crossgcc has already been built."
     return 0
   fi
+  if [ -d "${scriptdir}/xgcc" ]
+  then
+    echo "${scriptdir}/xgcc exists, using it."
+    rsync -a "${scriptdir}/xgcc/" "${crossgcc_dir}/xgcc/"
+    return 0
+  fi
 
   export EXTERNAL_DEPS_FILE="$(mktemp -t external_deps.XXXXX)"
   rm -f "${EXTERNAL_DEPS_FILE}"
 
   # Build the toolchain: this step takes a lot of time, and we should probably
   # use our internal gcc with patches, bells and whistles.
-  if ! CPUS=$(nproc --ignore=1 --all) BUILD_LANGUAGES=c make "crossgcc-i386"; then
+  if ! CPUS=$(nproc --ignore=1 --all) BUILD_LANGUAGES=c make "crossgcc-i386"
+  then
     set +x
     {
       echo
       echo "=== Toolchain build failed"
-      if [ -f "${EXTERNAL_DEPS_FILE}" ]; then
+      if [ -f "${EXTERNAL_DEPS_FILE}" ]
+      then
         echo
         echo -n "One or more additional external dependencies are required for the build: "
         cat "${EXTERNAL_DEPS_FILE}"
@@ -100,7 +103,8 @@ setup_crossgcc()
     } >&2
     exit 1
   fi
-  if [ -f "${EXTERNAL_DEPS_FILE}" ]; then
+  if [ -f "${EXTERNAL_DEPS_FILE}" ]
+  then
     set +x
     {
       echo
@@ -120,11 +124,11 @@ make_coreboot() {
   # Prepare .config and apply patches
   cp "${config}" ".config"
 
-  # make sure that oldconfig won't go interactive. If `conf` succeeds, oldconfig
-  # won't prompt for input.
-  # ./build/util/kconfig/conf --listnewconfig src/Kconfig
-  #timeout 10 make oldconfig
   sed -i "s|# CONFIG_ANY_TOOLCHAIN is not set|CONFIG_ANY_TOOLCHAIN=n|g" .config
+
+  # Specify the bg-prov binary path.
+  # shellcheck disable=SC2154
+  sed -i "s|CONFIG_INTEL_CBNT_BG_PROV_EXTERNAL_BIN_PATH=.*|CONFIG_INTEL_CBNT_BG_PROV_EXTERNAL_BIN_PATH=\"${BGPROV_BIN}\"|g" .config
 
   # The `kernel` variable is set via buck in TARGETS
   # shellcheck disable=SC2154
@@ -143,7 +147,7 @@ make_coreboot() {
   # up-to-date. By default, coreboot will checkout the master branch for each
   # submodule. However we use branches e.g. for the blobs repo because it
   # contains binary blobs that we can't publish upstream.
-  timeout 10 make olddefconfig || echo "Need to rebase .config manually"
+  timeout 60 make olddefconfig || echo "Need to rebase .config manually"
   UPDATED_SUBMODULES=1 make -j${make_jobs} || UPDATED_SUBMODULES=1 make
   cp build/coreboot.rom "$OUT"
 }
@@ -174,6 +178,10 @@ create_vpd_variables() {
     # Disable FSP log, set log level to 2:Warning.
     $VPD -f "$OUT" -i RO_VPD -s fsp_log_enable=0
     $VPD -f "$OUT" -i RO_VPD -s fsp_log_level=2
+    netboot='{"type":"netboot","method":"dhcpv6"}'
+    localboot='{"type":"localboot","method":"grub"}'
+    $VPD -f "$OUT" -i RO_VPD -s Boot0000="$netboot"
+    $VPD -f "$OUT" -i RO_VPD -s Boot0001="$localboot"
   fi
   # Initialize RW_VPD to empty region
   $VPD -f "$OUT" -O -i RW_VPD
@@ -186,4 +194,4 @@ setup_crossgcc
 make_coreboot
 create_vpd_variables
 
-echo "Coreboot build done"
+echo "Coreboot build done, flash image: $(realpath "${OUT}")"

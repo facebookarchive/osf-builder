@@ -58,11 +58,12 @@ func newConfigWithIncludes(data []byte, basedir string, maxDepth, currentDepth u
 	if currentDepth > maxDepth {
 		return nil, fmt.Errorf("maximum recursion depth of %d reached", maxDepth)
 	}
-	config, err := NewConfig(data)
+	topConfig, err := NewConfig(data)
 	if err != nil {
 		return nil, err
 	}
-	for _, include := range config.Includes {
+	config := &Config{}
+	for _, include := range topConfig.Includes {
 		if !filepath.IsAbs(include) {
 			include = filepath.Join(basedir, include)
 		}
@@ -78,6 +79,10 @@ func newConfigWithIncludes(data []byte, basedir string, maxDepth, currentDepth u
 		if err != nil {
 			return nil, fmt.Errorf("failed to merge file '%s' into the configuration: %v", include, err)
 		}
+	}
+	config, err = mergeConfigs(config, topConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to merge top config into the configuration: %v", err)
 	}
 	return config, nil
 }
