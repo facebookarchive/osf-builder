@@ -20,11 +20,11 @@
         "dest": "resources",
         "filelist": [
           {
-            "url": "file://../linuxboot-artifacts/flashrom",
+            "url": "file://../resources/flashrom",
             "hash": "sha256:de605453e529ecc20f9890aa2c9fdb8e89e032a247bc49df1b823900d4bfb530"
           },
           {
-            "url": "file://../linuxboot-artifacts/vpd",
+            "url": "file://../resources/vpd",
             "hash": "sha256:0a6084ea8746fc52a3cf8cf01426271e8045dbad2b30666bd5c8991d175f90de"
           }
         ]
@@ -34,8 +34,8 @@
     "untar": [
       {
         "label": "kernel",
-        "url": "file://../blobs/linux-v5.2-fbk3.tar.gz",
-        "hash": "sha256:5c4d5b16a3b48e49ce787ff1070d13415a41b5455de6cd9b248aaad120102192"
+        "url": "file://../resources/linux-5.12.10.tar.xz",
+        "hash": "sha256:c8d499fc53ed14838994ec2f51591ae40d64cce68559cd897be8acbeeee7630f"
       }
     ]
   }

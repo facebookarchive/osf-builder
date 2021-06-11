@@ -16,6 +16,14 @@
 # KERNEL=~/fbcode/buck-out/gen/osf/linuxboot/uroot-x86_64-outputs__srcs/kernel-source/arch/x86/boot/bzImage \
 # ./build-coreboot.sh
 #
+# Optional variables:
+# OUT: path to the output file. Default: coreboot-${PLATFORM}.rom
+# PATCHDIR: path to the directory containing patch files. Each patch file name
+#     has to end with ".patch" in order to be picked
+# BGPROV_BIN: path to the bg-prov binary, used for CBnT. If set, will enable CBnT
+#     support using the specified bg-prov binary.
+#
+#
 # Remember to rebuild the kernel and ramfs in case you are making local changes:
 #   buck build //osf/linuxboot:kernel
 
@@ -24,11 +32,12 @@ set -e -x -u
 scriptdir="$(realpath "$(dirname "$0")")"
 OUT=${OUT:-"coreboot-${PLATFORM}.rom"}
 config="${scriptdir}/linuxboot-artifacts/coreboot-config-${PLATFORM}"
-patches="${scriptdir}/patches/coreboot-${PLATFORM}-*.patch"
+patchdir=${PATCHDIR:-${scriptdir}}
+patches="${patchdir}/coreboot-${PLATFORM}-*.patch"
 KERNEL=${KERNEL:-"${PWD}/kernel/linuxboot_uroot_ttys0"}
 VER=${VER:-"0.0.0"}
 VPD=${VPD:-"${scriptdir}/linuxboot-artifacts/vpd"}
-BGPROV_BIN=${BGPROV_BIN:-"${scriptdir}/linuxboot-artifacts/bg-prov"}
+BGPROV_BIN=${BGPROV_BIN:-}
 
 pushd coreboot
 
@@ -126,9 +135,12 @@ make_coreboot() {
 
   sed -i "s|# CONFIG_ANY_TOOLCHAIN is not set|CONFIG_ANY_TOOLCHAIN=n|g" .config
 
-  # Specify the bg-prov binary path.
-  # shellcheck disable=SC2154
-  sed -i "s|CONFIG_INTEL_CBNT_BG_PROV_EXTERNAL_BIN_PATH=.*|CONFIG_INTEL_CBNT_BG_PROV_EXTERNAL_BIN_PATH=\"${BGPROV_BIN}\"|g" .config
+  # Specify the bg-prov binary path, if requested
+  if [ ! -z "${BGPROV_BIN}" ]
+  then
+    # shellcheck disable=SC2154
+    sed -i "s|CONFIG_INTEL_CBNT_BG_PROV_EXTERNAL_BIN_PATH=.*|CONFIG_INTEL_CBNT_BG_PROV_EXTERNAL_BIN_PATH=\"${BGPROV_BIN}\"|g" .config
+  fi
 
   # The `kernel` variable is set via buck in TARGETS
   # shellcheck disable=SC2154

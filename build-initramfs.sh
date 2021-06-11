@@ -94,11 +94,8 @@ then
 fi
 
 flags=("${flags[@]}"
-  "-files" "$(readlink -f "${scriptdir}"/linuxboot-artifacts/flashrom):bin/flashrom"
-  "-files" "$(readlink -f "${scriptdir}"/linuxboot-artifacts/vpd):bin/vpd"
-  "-files" "$(readlink -f "${scriptdir}"/linuxboot-artifacts/vpd_r.sh):bin/vpd_r.sh"
-  "-files" "$(readlink -f "${scriptdir}"/linuxboot-artifacts/vpd_w.sh):bin/vpd_w.sh"
-  "-files" "$(readlink -f "${scriptdir}"/linuxboot-artifacts/ca.pem):etc/cacerts.pem"
+  "-files" "$(readlink -f "${scriptdir}"/resources/flashrom):bin/flashrom"
+  "-files" "$(readlink -f "${scriptdir}"/resources/vpd):bin/vpd"
 )
 
 for cmd in "${base_cmds[@]}"
