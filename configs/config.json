@@ -34,7 +34,7 @@
     "untar": [
       {
         "label": "kernel",
-        "url": "file://../resources/linux-5.12.10.tar.xz",
+        "url": "file://../resources/linux-v4.16-fbk12.tar.gz",
         "hash": "sha256:c8d499fc53ed14838994ec2f51591ae40d64cce68559cd897be8acbeeee7630f"
       }
     ]
