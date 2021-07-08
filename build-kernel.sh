@@ -3,7 +3,7 @@
 scriptdir="$(realpath "$(dirname "$0")")"
 OUT=${OUT:-"linuxboot_uroot_ttys0"}
 
-artifacts="${ARTIFACTS:-${scriptdir}/linuxboot-artifacts}"
+artifacts="${ARTIFACTSDIR:-${scriptdir}/linuxboot-artifacts}"
 kconfig="${KCONFIG:-${artifacts}/config.linuxboot.x86_64}"
 patchdir="${PATCHDIR:-${scriptdir}/patches}"
 initramfs=${INITRAMFS:-}

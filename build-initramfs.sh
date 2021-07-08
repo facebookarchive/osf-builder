@@ -94,9 +94,10 @@ then
     flags=("${flags[@]}" "-uinitcmd=${UINITCMD}")
 fi
 
+resourcesdir="${RESOURCESDIR:-${scriptdir}/resources}"
 flags=("${flags[@]}"
-  "-files" "$(readlink -f "${scriptdir}"/resources/flashrom):bin/flashrom"
-  "-files" "$(readlink -f "${scriptdir}"/resources/vpd):bin/vpd"
+  "-files" "$(readlink -f "${resourcesdir}"/flashrom):bin/flashrom"
+  "-files" "$(readlink -f "${resourcesdir}"/vpd):bin/vpd"
 )
 
 for cmd in "${base_cmds[@]}"
