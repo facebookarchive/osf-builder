@@ -1,0 +1,11 @@
+diff -wbBdu -ruN k1/include/linux/perf_event.h k2/include/linux/perf_event.h
+--- k1/include/linux/perf_event.h	2018-05-18 02:12:24.000000000 -0700
++++ k2/include/linux/perf_event.h	2018-05-18 02:54:55.719186313 -0700
+@@ -871,6 +871,7 @@
+ 				int src_cpu, int dst_cpu);
+ int perf_event_read_local(struct perf_event *event, u64 *value,
+ 			  u64 *enabled, u64 *running);
++static inline bool perf_event_is_tracing(struct perf_event *);
+ extern u64 perf_event_read_value(struct perf_event *event,
+ 				 u64 *enabled, u64 *running);
+ 

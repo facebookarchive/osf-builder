@@ -1,0 +1,71 @@
+From 2de7823f644b5e5fe5848f2c21a3e479f1482525 Mon Sep 17 00:00:00 2001
+From: Johnny Lin <johnny_lin@wiwynn.com>
+Date: Mon, 20 Jul 2020 20:38:34 +0800
+Subject: [PATCH] systemboot: Add clearRwVpd function for erasing RW_VPD
+
+This is just a workaround approach, cannot be upstreamed.
+
+Signed-off-by: Johnny Lin <johnny_lin@wiwynn.com>
+---
+ cmds/boot/systemboot/main.go |  4 +++-
+ cmds/boot/systemboot/vpd.go  | 33 +++++++++++++++++++++++++++++++++
+ 2 files changed, 36 insertions(+), 1 deletion(-)
+ create mode 100644 cmds/boot/systemboot/vpd.go
+
+diff --git a/cmds/boot/systemboot/main.go b/cmds/boot/systemboot/main.go
+index dba3e8f..5add165 100644
+--- a/cmds/boot/systemboot/main.go	2020-08-17 16:33:59.003521800 -0700
++++ b/cmds/boot/systemboot/main.go	2020-08-17 16:35:13.842634365 -0700
+@@ -69,7 +69,9 @@ func checkCMOSClear(ipmi *ipmi.IPMI) error {
+ 		if err = cmosClear(); err != nil {
+ 			return err
+ 		}
+-		// ToDo: Reset RW_VPD to default values
++		if err = clearRwVpd(); err != nil {
++			return err
++		}
+ 		if err = ocp.ClearCMOSClearValidBits(ipmi, bootorder); err != nil {
+ 			return err
+ 		}
+diff --git a/cmds/boot/systemboot/vpd.go b/cmds/boot/systemboot/vpd.go
+new file mode 100644
+index 0000000..41332a1
+--- /dev/null
++++ b/cmds/boot/systemboot/vpd.go
+@@ -0,0 +1,33 @@
++// Copyright 2020 the u-root Authors. All rights reserved
++// Use of this source code is governed by a BSD-style
++// license that can be found in the LICENSE file.
++
++package main
++
++import (
++	"log"
++	"os"
++	"os/exec"
++)
++
++func clearRwVpd() error {
++	log.Printf("Reading BIOS...")
++	cmd := exec.Command("flashrom", "-p", "internal:ich_spi_mode=hwseq", "-c", "Opaque flash chip", "--ifd", "-i", "bios", "-r", "/tmp/bios.bin")
++	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
++	if err := cmd.Run(); err != nil {
++		log.Printf("flashrom failed to read BIOS: %v", err)
++		return err
++	}
++	cmd = exec.Command("vpd", "-f", "/tmp/bios.bin", "-O", "-i", "RW_VPD")
++	if err := cmd.Run(); err != nil {
++		log.Printf("Failed resetting RW_VPD: %v", err)
++		return err
++	}
++	log.Printf("Updating BIOS...")
++	cmd = exec.Command("flashrom", "-p", "internal:ich_spi_mode=hwseq", "-c", "Opaque flash chip", "--ifd", "-i", "bios", "--noverify-all", "-w", "/tmp/bios.bin")
++	if err := cmd.Run(); err != nil {
++		log.Printf("flashrom failed to write BIOS: %v", err)
++		return err
++	}
++	return nil
++}
+-- 
+2.7.4
+

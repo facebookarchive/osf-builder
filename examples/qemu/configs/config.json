@@ -1,0 +1,42 @@
+{
+  "initramfs": {
+    "untar": [
+      {
+        "label": "go",
+        "url": "https://golang.org/dl/go1.15.linux-amd64.tar.gz",
+        "hash": "sha256:2d75848ac606061efe52a8068d0e647b35ce487a15bb52272c427df485193602"
+      }
+    ],
+    "goget": [
+      {
+        "label": "uroot",
+        "pkg": "https://github.com/u-root/u-root",
+        "branch": "master",
+        "hash": "60aeb0ab57dfac6e19f057de0b3e25793ede1616"
+      }
+    ],
+    "files": {
+        "label": "native binaries",
+        "dest": "resources",
+        "filelist": [
+          {
+            "url": "file://../resources/flashrom",
+            "hash": "sha256:de605453e529ecc20f9890aa2c9fdb8e89e032a247bc49df1b823900d4bfb530"
+          },
+          {
+            "url": "file://../resources/vpd",
+            "hash": "sha256:0a6084ea8746fc52a3cf8cf01426271e8045dbad2b30666bd5c8991d175f90de"
+          }
+        ]
+    }
+  },
+  "kernel": {
+    "untar": [
+      {
+        "label": "kernel",
+        "url": "file://../resources/linux-v4.16-fbk12.tar.gz",
+        "hash": "sha256:c8d499fc53ed14838994ec2f51591ae40d64cce68559cd897be8acbeeee7630f"
+      }
+    ]
+  }
+}

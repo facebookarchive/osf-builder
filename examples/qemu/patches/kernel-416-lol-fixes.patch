@@ -1,0 +1,31 @@
+diff -wbBdu -ruN a/arch/x86/mm/init.c b/arch/x86/mm/init.c
+--- a/arch/x86/mm/init.c	2018-09-25 07:39:35.000000000 -0700
++++ b/arch/x86/mm/init.c	2018-09-26 02:04:34.254161000 -0700
+@@ -887,6 +887,7 @@
+ 	__pte2cachemode_tbl[entry] = cache;
+ }
+ 
++#ifdef CONFIG_SWAP
+ unsigned long max_swapfile_size(void)
+ {
+ 	unsigned long pages;
+@@ -907,3 +908,4 @@
+ 	}
+ 	return pages;
+ }
++#endif
+diff -wbBdu -ruN a/kernel/sched/stats.h b/kernel/sched/stats.h
+--- a/kernel/sched/stats.h	2018-09-25 07:39:41.000000000 -0700
++++ b/kernel/sched/stats.h	2018-09-26 01:55:04.650549000 -0700
+@@ -260,9 +260,9 @@
+ 		__sched_info_switch(rq, prev, next);
+ }
+ #else
+-#define sched_info_queued(rq, t)		do { } while (0)
++#define sched_info_queued(rq, t, wakeup)		do { } while (0)
+ #define sched_info_reset_dequeued(t)	do { } while (0)
+-#define sched_info_dequeued(rq, t)		do { } while (0)
++#define sched_info_dequeued(rq, t, wakeup)		do { } while (0)
+ #define sched_info_depart(rq, t)		do { } while (0)
+ #define sched_info_arrive(rq, next)		do { } while (0)
+ #define sched_info_switch(rq, t, next)		do { } while (0)
