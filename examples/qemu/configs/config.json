@@ -31,12 +31,13 @@
     }
   },
   "kernel": {
-    "untar": [
+    "git": [
       {
         "label": "kernel",
-        "url": "file://../resources/linux-v4.16-fbk12.tar.gz",
-        "hash": "sha256:c8d499fc53ed14838994ec2f51591ae40d64cce68559cd897be8acbeeee7630f"
-      }
-    ]
+        "url": "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git",
+				"branch": "linux-5.10.y",
+        "hash": "a09a52277207fa79fc1aa7c32be6035c264a79c4"
+			}
+		]
   }
 }
