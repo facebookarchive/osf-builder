@@ -22,6 +22,7 @@ then
 fi
 export GOPATH
 
+set +e
 # Apply patches.
 patchdir="${PATCHDIR:-${scriptdir}/patches}"
 for p in "${patchdir}"/initramfs-*.patch; do
@@ -29,7 +30,7 @@ for p in "${patchdir}"/initramfs-*.patch; do
   echo "Applying patch: $p"
   patch -d gopath/src/github.com/u-root/u-root -p 1 -b < "$p"
 done
-
+set -e
 ADDITIONAL_CMDS=${ADDITIONAL_CMDS:-}
 UINITCMD=${UINITCMD-systemboot}
 
