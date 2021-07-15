@@ -1,58 +1,29 @@
-#!/bin/bash -exu
+#!/bin/bash
 #
-# This is the top level script to build without kernel and u-root
-# source code being in FBCODE.
-# It needs to be run under Linuxboot root directory.
+# This is the build script.
+#
 # During the build process, it removes and rebuilds
-# these directories: initramfs, kernel-source, coreboot.
+# these directories: initramfs, kernel, coreboot.
 #
 # Make sure the gcc version is higher than 4.8
 #
 # The following environment variables should be set:
 #
-# PLATFORM=deltalake (or tiogapass, monolake)
-# CONFIGDIR=/path/to/dir: optional, path to where config-$PLATFORM.json is
-#     located. Default: ${scriptdir}/configs/
-# VER=<overall firmware version>: optional, effective for deltalake
-# KM_PRIV_KEY_PATH=<path to KM private key>: optional, effective for deltalake-dvt
-# ODM_PRIV_KEY_PATH=<path to ODM private key>: optional, effective for deltalake-dvt
-#     KM_PRIV_KEY_PATH and ODM_PRIV_KEY_PAH need to be provided together, if neither KM_PRIV_KEY_PATH nor
-# ODM_PRIV_KEY_PATH is provided for deltalake-dvt, it would use the default test keys
-#     under cbnt to sign coreboot image.
+# PLATFORM=ac|qemu-x86_64
 
-if [ -z "$PLATFORM" ]
-then
-  echo "PLATFORM environment variable is undefined."
-  exit 1
-fi
+set -e -x -u
 
 scriptdir="$(realpath "$(dirname "$0")")"
 
-CONFIGDIR=${CONFIGDIR:-${scriptdir}/configs/}
-HASH="${HASH:-strict}"
-KM_PRIV_KEY_PATH=${KM_PRIV_KEY_PATH:-""}
-ODM_PRIV_KEY_PATH=${ODM_PRIV_KEY_PATH:-""}
-
-# Path to the getdeps executable. If not specified, it will be
-# built from local sources.
-GETDEPS="${GETDEPS:-}"
-
-if [ "${GETDEPS}" = "" ]
-then
-    pushd "${scriptdir}"
-    GO111MODULE=off go build -o cmd/getdeps/getdeps ./cmd/getdeps/
-    GETDEPS="${scriptdir}/cmd/getdeps/getdeps"
-    popd
-fi
+export CONFIGDIR=${CONFIGDIR:-${scriptdir}/configs}
+export HASH_MODE=${HASH_MODE:-strict}
+export PLATFORM=${PLATFORM:-ac}
 
 # Build initramfs based on go/u-root
-"${GETDEPS}" --components initramfs -c "${CONFIGDIR}/config-${PLATFORM}.json"
 "${scriptdir}/build-initramfs.sh"
 
 # Build Linux kernel and then coreboot payload
-"${GETDEPS}" --components kernel -c "${CONFIGDIR}/config-${PLATFORM}.json"
 "${scriptdir}/build-kernel.sh"
 
 # Build coreboot and then Linuxboot FW image
-"${GETDEPS}" --components coreboot -c "${CONFIGDIR}/config-${PLATFORM}.json" -H "$HASH"
 "${scriptdir}/build-coreboot.sh"

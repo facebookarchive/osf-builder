@@ -1,16 +1,25 @@
 #!/bin/bash -exu
 
 scriptdir="$(realpath "$(dirname "$0")")"
-OUT=${OUT:-"linuxboot_uroot_ttys0"}
+OUT=${OUT:-"${scriptdir}/kernel/linuxboot_uroot_ttys0"}
+CONFIGDIR=${CONFIGDIR:-${scriptdir}/configs}
 
-artifacts="${ARTIFACTS:-${scriptdir}/linuxboot-artifacts}"
-kconfig="${KCONFIG:-${artifacts}/config.linuxboot.x86_64}"
+kconfig="${KCONFIG:-${CONFIGDIR}/kernel-linuxboot.config}"
 patchdir="${PATCHDIR:-${scriptdir}/patches}"
-initramfs=${INITRAMFS:-}
+initramfs=${INITRAMFS:-${scriptdir}/initramfs/initramfs_linuxboot.amd64.cpio}
 num_cores=$(nproc --all)
 kernel_image="arch/x86/boot/bzImage"
 
+NODEPS=${NODEPS:-0}
+HASH_MODE=${HASH_MODE:-strict}
+if [ "${NODEPS}" != "1" ]; then
+  "${scriptdir}/tools/getdeps.sh" --components kernel -c "${CONFIGDIR}/config-${PLATFORM}.json" -H "${HASH_MODE}"
+fi
+
 pushd kernel
+
+# Snapshots come with a linux-x.y.z directory, git clones don't have it, we account for both.
+[ -e Makefile ] || pushd linux-*.*.*
 
 echo "Applying patches from ${patchdir}"
 for p in "${patchdir}"/kernel-*; do

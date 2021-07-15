@@ -4,7 +4,7 @@
 # deltalake, tiogapass, monolake, qemu-x86_64.
 # This script expects a few environment variables, that are set in TARGETS:
 # * `PLATFORM`: the name of the platform to build coreboot for. E.g. "qemu"
-# * `KERNEL`, the path of the Linux kernel to use as coreboot primary payload.
+# * `PAYLOAD`, the path of the Linux kernel to use as coreboot primary payload.
 #   There is no secondary payload, so make sure to embed your initramfs in the
 #   kernel image.
 #
@@ -13,7 +13,7 @@
 #
 # PLATFORM=your-platform-name \  # e.g. deltalake, tiogapass, monolake
 # VER=your-version-string \  # e.g. 1.0. Only needed for deltalake, default is 0.0.0
-# KERNEL=~/fbcode/buck-out/gen/osf/linuxboot/uroot-x86_64-outputs__srcs/kernel-source/arch/x86/boot/bzImage \
+# PAYLOAD=~/fbcode/buck-out/gen/osf/linuxboot/uroot-x86_64-outputs__srcs/kernel-source/arch/x86/boot/bzImage \
 # ./build-coreboot.sh
 #
 # Optional variables:
@@ -31,15 +31,25 @@ set -e -x -u
 
 scriptdir="$(realpath "$(dirname "$0")")"
 OUT=${OUT:-"coreboot-${PLATFORM}.rom"}
-config="${scriptdir}/linuxboot-artifacts/coreboot-config-${PLATFORM}"
-patchdir=${PATCHDIR:-${scriptdir}}
+CONFIGDIR=${CONFIGDIR:-${scriptdir}/configs}
+
+config="${CONFIGDIR}/coreboot-config-${PLATFORM}"
+patchdir=${PATCHDIR:-${scriptdir}/patches}
 patches="${patchdir}/coreboot-${PLATFORM}-*.patch"
-KERNEL=${KERNEL:-"${PWD}/kernel/linuxboot_uroot_ttys0"}
+PAYLOAD=${PAYLOAD:-"${scriptdir}/kernel/linuxboot_uroot_ttys0"}
 VER=${VER:-"0.0.0"}
-VPD=${VPD:-"${scriptdir}/linuxboot-artifacts/vpd"}
+VPD=${VPD:-"${scriptdir}/tools/vpd"}
 BGPROV_BIN=${BGPROV_BIN:-}
 
+NODEPS=${NODEPS:-0}
+HASH_MODE=${HASH_MODE:-strict}
+if [ "${NODEPS}" != "1" ]; then
+  "${scriptdir}/tools/getdeps.sh" --components coreboot -c "${CONFIGDIR}/config-${PLATFORM}.json" -H "${HASH_MODE}"
+fi
+
 pushd coreboot
+
+[ -f "${PAYLOAD}" ] || { echo "Payload file ${PAYLOAD} does not exist"; exit 1; }
 
 check_gcc() {
   # This function verifies that gcc tool has version greater than or equal to 5.0.0.
@@ -144,7 +154,7 @@ make_coreboot() {
 
   # The `kernel` variable is set via buck in TARGETS
   # shellcheck disable=SC2154
-  sed -i "s|CONFIG_PAYLOAD_FILE=.*|CONFIG_PAYLOAD_FILE=\"${KERNEL}\"|g" .config
+  sed -i "s|CONFIG_PAYLOAD_FILE=.*|CONFIG_PAYLOAD_FILE=\"${PAYLOAD}\"|g" .config
 
   # Try doing a parallel build first. If -jN fails, fall back to -j1 since it's
   # easier to read error output that way.

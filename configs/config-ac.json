@@ -1,0 +1,56 @@
+{
+  "includes": [
+    "config.json"
+  ],
+  "coreboot": {
+    "git": [
+      {
+        "label": "coreboot",
+        "url": "https://review.coreboot.org/coreboot-spr-sp.git",
+        "branch": "master",
+        "hash": "f9f78b0eca6b345e9b127ff7a113b47846657798"
+      },
+      {
+        "label": "vboot",
+        "url": "https://review.coreboot.org/vboot",
+        "dest": "3rdparty/vboot",
+        "branch": "master",
+        "hash": "57c0c5be50767c3f86c648bf33e15955cc349f25"
+      }
+    ],
+    "files": {
+      "label": "crossgcc_tarballs",
+      "dest": "util/crossgcc/tarballs",
+      "filelist": [
+        {
+          "url": "https://ftpmirror.gnu.org/gmp/gmp-6.2.0.tar.xz",
+          "hash": "sha256:258e6cd51b3fbdfc185c716d55f82c08aff57df0c6fbd143cf6ed561267a1526"
+        },
+        {
+          "url": "https://ftpmirror.gnu.org/mpfr/mpfr-4.1.0.tar.xz",
+          "hash": "sha256:0c98a3f1732ff6ca4ea690552079da9c597872d30e96ec28414ee23c95558a7f"
+        },
+        {
+          "url": "https://ftpmirror.gnu.org/mpc/mpc-1.2.0.tar.gz",
+          "hash": "sha256:e90f2d99553a9c19911abdb4305bf8217106a957e3994436428572c8dfe8fda6"
+        },
+        {
+          "url": "https://ftpmirror.gnu.org/binutils/binutils-2.35.1.tar.xz",
+          "hash": "sha256:3ced91db9bf01182b7e420eab68039f2083aed0a214c0424e257eae3ddee8607"
+        },
+        {
+          "url": "https://ftpmirror.gnu.org/gcc/gcc-8.3.0/gcc-8.3.0.tar.xz",
+          "hash": "sha256:64baadfe6cc0f4947a84cb12d7f0dfaf45bb58b7e92461639596c21e02d97d2c"
+        },
+        {
+          "url": "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/nasm-2.15.05.tar.bz2",
+          "hash": "sha256:3c4b8339e5ab54b1bcb2316101f8985a5da50a3f9e504d43fa6f35668bee2fd0"
+        },
+        {
+          "url": "https://acpica.org/sites/acpica/files/acpica-unix2-20200925.tar.gz",
+          "hash": "sha256:5cb40ff01aaf27caf639e9928bab02706c3d7bff649f16e32d48bee99208c6a2"
+        }
+      ]
+    }
+  }
+}

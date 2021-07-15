@@ -4,6 +4,13 @@
 
 scriptdir="$(realpath "$(dirname "$0")")"
 OUT=${OUT:-"initramfs_linuxboot.amd64.cpio"}
+CONFIGDIR=${CONFIGDIR:-${scriptdir}/configs}
+
+NODEPS=${NODEPS:-0}
+HASH_MODE=${HASH_MODE:-strict}
+if [ "${NODEPS}" != "1" ]; then
+  "${scriptdir}/tools/getdeps.sh" --components initramfs -c "${CONFIGDIR}/config-${PLATFORM}.json" -H "${HASH_MODE}"
+fi
 
 pushd initramfs
 export PATH="${PWD}/go/bin:${PATH}"
@@ -23,8 +30,11 @@ fi
 export GOPATH
 
 # Apply patches.
-for p in "${scriptdir}"/patches/initramfs-*.patch; do
+patchdir=${PATCHDIR:-${scriptdir}/patches}
+patches=$(echo ${patchdir}/initramfs-${PLATFORM}-*.patch)
+for p in $patches; do
   p=$(realpath $p)
+  [ -e "$p" ] || continue
   echo "Applying patch: $p"
   patch -d gopath/src/github.com/u-root/u-root -p 1 -b < "$p"
 done
@@ -94,8 +104,8 @@ then
 fi
 
 flags=("${flags[@]}"
-  "-files" "$(readlink -f "${scriptdir}"/resources/flashrom):bin/flashrom"
-  "-files" "$(readlink -f "${scriptdir}"/resources/vpd):bin/vpd"
+  "-files" "$(readlink -f "${scriptdir}"/tools/flashrom):bin/flashrom"
+  "-files" "$(readlink -f "${scriptdir}"/tools/vpd):bin/vpd"
 )
 
 for cmd in "${base_cmds[@]}"

@@ -1,0 +1,56 @@
+From 536f5bd830fac5022ff9c5be68bd92a3ef6e01da Mon Sep 17 00:00:00 2001
+From: Jonathan Zhang <jonzhang@fb.com>
+Date: Fri, 9 Jul 2021 18:40:32 -0700
+Subject: [PATCH] mb/intel/archercity_crb: add VPD regions
+
+Signed-off-by: Jonathan Zhang <jonzhang@fb.com>
+Change-Id: I9353183ee63b01017637cd30d8116ca761ebd8e2
+---
+ src/mainboard/intel/archercity_crb/board.fmd  |  4 +++-
+ .../intel/archercity_crb/board.fmd.bak        | 21 +++++++++++++++++++
+ 2 files changed, 24 insertions(+), 1 deletion(-)
+ create mode 100644 src/mainboard/intel/archercity_crb/board.fmd.bak
+
+diff --git a/src/mainboard/intel/archercity_crb/board.fmd b/src/mainboard/intel/archercity_crb/board.fmd
+index 1fe9d1b73a..9bc255d89a 100644
+--- a/src/mainboard/intel/archercity_crb/board.fmd
++++ b/src/mainboard/intel/archercity_crb/board.fmd
+@@ -7,5 +7,7 @@ FLASH@0xfc000000 64M {
+ 	}
+ 	FMAP@0x03000000 0x800
+ 	RW_MRC_CACHE@0x3000800 0x10000
+-	COREBOOT(CBFS)@0x3010800
++	COREBOOT(CBFS)@0x3010800 0xfe0000
++	RW_VPD(PRESERVE)@0x3ff0800 0x4000
++	RO_VPD(PRESERVE)@0x3ff4800 0x4000
+ }
+diff --git a/src/mainboard/intel/archercity_crb/board.fmd.bak b/src/mainboard/intel/archercity_crb/board.fmd.bak
+new file mode 100644
+index 0000000000..116f40eafd
+--- /dev/null
++++ b/src/mainboard/intel/archercity_crb/board.fmd.bak
+@@ -0,0 +1,21 @@
++FLASH@0xfc000000 64M {
++	SI_ALL@0x0 0x03000000 {
++		SI_DESC@0x0 0x1000
++		SI_GBE@0x1000 0x2000
++		SI_ME@0x3000 0xfed000
++		SI_PT@0x2ff0000 0x10000
++	}
++  SI_BIOS@0x3000000 {
++    FMAP@0x0 0x800
++    MISC_RW@0x800 0x20000 {
++      RW_MRC_CACHE@0x0 0x10000
++      RW_VPD(PRESERVE)@0x10000 0x4000
++    }
++    WP_RO@0x28000 {
++      RO_VPD(PRESERVE)@0x0 0x4000
++      RO_SECTION@0x4000 {
++        COREBOOT(CBFS)@0x0
++      }
++    }
++  }
++}
+-- 
+2.30.2
+

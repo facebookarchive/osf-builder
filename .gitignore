@@ -1,4 +1,4 @@
-cmd/getdeps/getdeps
+tools/getdeps/getdeps
 generated_versions.json
 kernel
 initramfs
