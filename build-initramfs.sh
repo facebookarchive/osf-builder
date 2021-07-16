@@ -22,13 +22,15 @@ then
 fi
 export GOPATH
 
+set +e
 # Apply patches.
-for p in "${scriptdir}"/patches/initramfs-*.patch; do
+patchdir="${PATCHDIR:-${scriptdir}/patches}"
+for p in "${patchdir}"/initramfs-*.patch; do
   p=$(realpath $p)
   echo "Applying patch: $p"
   patch -d gopath/src/github.com/u-root/u-root -p 1 -b < "$p"
 done
-
+set -e
 ADDITIONAL_CMDS=${ADDITIONAL_CMDS:-}
 UINITCMD=${UINITCMD-systemboot}
 
@@ -93,9 +95,10 @@ then
     flags=("${flags[@]}" "-uinitcmd=${UINITCMD}")
 fi
 
+resourcesdir="${RESOURCESDIR:-${scriptdir}/resources}"
 flags=("${flags[@]}"
-  "-files" "$(readlink -f "${scriptdir}"/resources/flashrom):bin/flashrom"
-  "-files" "$(readlink -f "${scriptdir}"/resources/vpd):bin/vpd"
+  "-files" "$(readlink -f "${resourcesdir}"/flashrom):bin/flashrom"
+  "-files" "$(readlink -f "${resourcesdir}"/vpd):bin/vpd"
 )
 
 for cmd in "${base_cmds[@]}"

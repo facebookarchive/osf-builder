@@ -12,7 +12,7 @@
         "label": "uroot",
         "pkg": "https://github.com/u-root/u-root",
         "branch": "master",
-        "hash": "60aeb0ab57dfac6e19f057de0b3e25793ede1616"
+        "hash": "6f4ed4e6515753019e0140216afbe5f116230992"
       }
     ],
     "files": {
@@ -31,12 +31,13 @@
     }
   },
   "kernel": {
-    "untar": [
+    "git": [
       {
         "label": "kernel",
-        "url": "file://../resources/linux-v4.16-fbk12.tar.gz",
-        "hash": "sha256:c8d499fc53ed14838994ec2f51591ae40d64cce68559cd897be8acbeeee7630f"
-      }
-    ]
+        "url": "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git",
+				"branch": "linux-5.10.y",
+        "hash": "a09a52277207fa79fc1aa7c32be6035c264a79c4"
+			}
+		]
   }
 }

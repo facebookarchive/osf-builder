@@ -31,8 +31,9 @@ set -e -x -u
 
 scriptdir="$(realpath "$(dirname "$0")")"
 OUT=${OUT:-"coreboot-${PLATFORM}.rom"}
-config="${scriptdir}/linuxboot-artifacts/coreboot-config-${PLATFORM}"
-patchdir=${PATCHDIR:-${scriptdir}}
+artifactsdir="${ARTIFACTSDIR:-${scriptdir}/artifacts}"
+config="${artifactsdir}/coreboot-config-${PLATFORM}"
+patchdir=${PATCHDIR:-${scriptdir}/patches}
 patches="${patchdir}/coreboot-${PLATFORM}-*.patch"
 KERNEL=${KERNEL:-"${PWD}/kernel/linuxboot_uroot_ttys0"}
 VER=${VER:-"0.0.0"}
