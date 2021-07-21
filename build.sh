@@ -40,7 +40,7 @@ GETDEPS="${GETDEPS:-}"
 if [ "${GETDEPS}" = "" ]
 then
     pushd "${scriptdir}"
-    GO111MODULE=off go build -o cmd/getdeps/getdeps ./cmd/getdeps/
+    go build -o cmd/getdeps/getdeps ./cmd/getdeps/
     GETDEPS="${scriptdir}/cmd/getdeps/getdeps"
     popd
 fi
