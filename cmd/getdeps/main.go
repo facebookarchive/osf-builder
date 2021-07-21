@@ -264,11 +264,11 @@ func main() {
 		var component Component
 		switch componentName {
 		case "coreboot":
-			component = config.Coreboot
+			component = &config.Coreboot
 		case "kernel":
-			component = config.Kernel
+			component = &config.Kernel
 		case "initramfs":
-			component = config.Initramfs
+			component = &config.Initramfs
 		default:
 			// this should not happen, unless the switch cases are not kept in
 			// sync with the `supportedComponents` variable.

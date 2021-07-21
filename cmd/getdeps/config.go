@@ -19,10 +19,10 @@ type Config struct {
 	BuildID string `json:"build_id"`
 	// Additional config files to include. Their order matters: subsequent ones
 	// may override values from previous ones.
-	Includes  []string `json:"includes,omitempty"`
-	Initramfs *Node    `json:"initramfs,omitempty"`
-	Kernel    *Node    `json:"kernel,omitempty"`
-	Coreboot  *Node    `json:"coreboot,omitempty"`
+	Includes  []string  `json:"includes,omitempty"`
+	Initramfs Initramfs `json:"initramfs"`
+	Kernel    Kernel    `json:"kernel"`
+	Coreboot  Coreboot  `json:"coreboot"`
 }
 
 // NewConfig creates a new config object by parsing the specified file,
@@ -96,15 +96,15 @@ func mergeConfigs(config1 *Config, config2 *Config) (*Config, error) {
 		return nil, fmt.Errorf("config objects to merge must be non-nil")
 	}
 
-	newConfig.Initramfs, err = mergeNodes(config1.Initramfs, config2.Initramfs)
+	newConfig.Initramfs, err = mergeInitramfsConfigs(config1.Initramfs, config2.Initramfs)
 	if err != nil {
 		return &newConfig, fmt.Errorf("error merging initramfs config: %w", err)
 	}
-	newConfig.Kernel, err = mergeNodes(config1.Kernel, config2.Kernel)
+	newConfig.Kernel, err = mergeKernelConfigs(config1.Kernel, config2.Kernel)
 	if err != nil {
 		return &newConfig, fmt.Errorf("error merging kernel config: %w", err)
 	}
-	newConfig.Coreboot, err = mergeNodes(config1.Coreboot, config2.Coreboot)
+	newConfig.Coreboot, err = mergeCorebootConfigs(config1.Coreboot, config2.Coreboot)
 	if err != nil {
 		return &newConfig, fmt.Errorf("error merging coreboot config: %w", err)
 	}
