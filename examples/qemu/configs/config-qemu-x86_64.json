@@ -1,35 +1,45 @@
 {
-  "includes": [
-    "config.json"
-  ],
+  "initramfs": {
+    "untar": [
+      {
+        "label": "go",
+        "url": "https://golang.org/dl/go1.16.6.linux-amd64.tar.gz",
+        "hash": "sha256:be333ef18b3016e9d7cb7b1ff1fdb0cac800ca0be4cf2290fe613b3d069dfe0d"
+      }
+    ],
+    "goget": [
+      {
+        "label": "uroot",
+        "pkg": "https://github.com/u-root/u-root",
+        "branch": "master",
+        "hash": "ba3c4503673291183f54568dc0c0d0d7411302cd"
+      }
+    ]
+  },
+  "kernel": {
+    "untar": [
+      {
+        "label": "kernel",
+        "url": "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/snapshot/linux-5.10.50.tar.gz",
+        "hash": "sha256:81338158ebc77b35e426e1c47826458dada4e8500030553ef911e6cf729817de",
+        "subdir": "linux-5.10.50"
+      }
+    ]
+  },
   "coreboot": {
     "git": [
       {
         "label": "coreboot",
-        "url": "git@github.com:facebookexternal/osf-partner-coreboot",
-        "branch": "skx",
-        "hash": "1231ac6d15aa10eed8f7544ede71695b4c03c6af"
-      },
-      {
-        "label": "blobs",
-        "url": "git@github.com:facebookexternal/osf-partner-blobs",
-        "dest": "3rdparty/blobs",
-        "branch": "fb",
-        "hash": "970f6ea1e03ad94b92c3d6c1b654f7366aeaa927"
-      },
-      {
-        "label": "fsp",
-        "url": "git@github.com:facebookexternal/osf-partner-fsp",
-        "dest": "3rdparty/fsp",
-        "branch": "fb",
-        "hash": "6ad0bc861e04df189179b9d4bd0e9b5b355ec74b"
+        "url": "https://review.coreboot.org/coreboot",
+        "branch": "master",
+        "hash": "7014f8258e6e015fe91d6928266d10ec536e9001"
       },
       {
         "label": "vboot",
         "url": "https://review.coreboot.org/vboot",
         "dest": "3rdparty/vboot",
         "branch": "master",
-        "hash": "ed23c08440dae6657d026a30b504578e03e0426f"
+        "hash": "48195e5878006ac2cf74cb7f02953ab06c68202d"
       }
     ],
     "files": {

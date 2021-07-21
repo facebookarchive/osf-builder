@@ -84,7 +84,7 @@ func TestMergeConfigs(t *testing.T) {
 func TestMergeConfigsInitramfs(t *testing.T) {
 	leftBranch, leftHash := "leftbranch", "lefthash"
 	left := Config{
-		Initramfs: Initramfs{
+		Initramfs: &Node{
 			Goget: []Gopkg{
 				{Label: "override", Pkg: "pkg_thisshouldbeoverridden", Branch: &leftBranch, Hash: &leftHash},
 				{Label: "nooverride", Pkg: "pkg_thisshouldremain", Branch: &leftBranch, Hash: &leftHash},
@@ -96,7 +96,7 @@ func TestMergeConfigsInitramfs(t *testing.T) {
 		},
 	}
 	right := Config{
-		Initramfs: Initramfs{
+		Initramfs: &Node{
 			Goget: []Gopkg{
 				{Label: "override", Pkg: "pkg_thisshouldbehere", Branch: &leftBranch, Hash: &leftHash},
 			},
