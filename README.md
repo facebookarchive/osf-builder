@@ -1,45 +1,53 @@
-osf-builder
+# OSF Builder
 
 This osf-builder repo is an open source repo to faciliate the development
 community to collaborate on Open System Firmware (OSF).
 
-The OSF boot process has following phases:
-1. Coreboot. This component initize SoC and platform component (such as memory)
-to the extent that kernel on flash can be loaded. In future, UEFI support may be
-added.
-2. Linux Kernel. This component includes device drivers, file system drivers
-and networking drivers to support local boot and network boot. The kernel binary
-is built with Linux kernel code using Linuxboot specific Kconfig, which is needed
-to reduce kernel size.
-3. Initramfs. This component give system control to the target OS either locally
-or remotely. The initramfs is u-root, which is similar to busybox. It is built
-with go language.
+## Build pre-requisites
 
-In the build process, kernel is built first, followed by initramfs, and coreboot.
-In the end, flashable OSF host firmware image is built.
+ * GNU make
+ * Go 1.x
 
-This repo has 3 components:
-a. A code syncer. It is in cmd directory. It is written in go. It builds into
-getdpes binary, which is able to sync down code base based on JSON format
-configuration. The code base may be obtained from a certain commit of a certain
-branch of a certain repo, or from a local compressed tar ball, or from a URL.
-b. Build scripts. The build scripts get source code, build initramfs, kernel
-and then coreboot.
-c. A sample project. The examples/qemu directory contains a sample project.
-A project may have following components:
-** scripts to build and to clean. The build script may set up appropriate
-environment variables and call the osf-builder build script.
-** Configs: The code base configuration in JSON format. The JSON config files
-can be nested.
-** Artifacts: Linuxboot kernel Kconfig, coreboot config.
-** Patches: Patch files to be applied to kernel, u-root and coreboot.
-** Resources: Local tar balls and static binaries to be included in initramfs.
+## Build process
 
-Following are build server dependencies:
-* Compilers and build tools - These include jq, vpd tools, go compilers.
-* gcc version needs to be greater than or equal to 5.0.0. 
+OSF boot starts with [coreboot](https://coreboot.org/) first, then [Linux kernel](https://kernel.org/) which then executes init, which in this case is provided by [u-root](https://github.com/u-root/u-root).
+
+OSF build also consists of these three stages, executed in the reverse order.
+
+Entire build requires `PLATFORM` to be defined, this specifies the platform for which build is being run.
+
+ * `getdeps` is a tool used to fetch dependencies. It can clone Git repos, fetch files, etc.
+   * It is configured by a JSON file that must be specified in `CONFIG`.
+   * `CONFIG` consists of three top-level sections: `initramfs`, `kernel` and `coreboot` that specify what to fetch for each of the stages.
+ * Initramfs image is built first, by building u-root with certain set of commands.
+   * `initramfs` section of the `CONFIG` is executed by `getdeps` to fetch the u-root sources and the Go toolchain.
+   * `PATCHES_DIR/initramfs-PLATFORM-*` patches are applied.
+   * Default set of commands can be found in Makefile.inc `UROOT_BASE_CMDS`, it can be augmented with `UROOT_ADDITIONAL_CMDS` or replaced entirely.
+   * Additional commands can come from u-root itself or from external packages, in which case `UROOT_ADDITIONAL_GOPATH` may be required.
+   * Initramfs can embed binary utilities, files can be added through `UROOT_ADDITIONAL_FILES` as `local_path:initramfs_path` pairs.
+ * Kernel is built next
+   * `kernel` section of the `CONFIG` is executed by `getdeps` to fetch the kernel source.
+   * `PATCHES_DIR/kernel-PLATFORM-*` patches are applied.
+   * `KERNEL_CONFIG` is used as `.config`.
+ * Coreboot is built last
+   * `coreboot` section of the `CONFIG` is executed by `getdeps` to fetch the source and toolchain dependencies.
+   * `PATCHES_DIR/coreboot-PLATFORM-*` patches are applied.
+   * `COREBOOT_CONFIG` is used as `.config`.
+   * Resulting flahs image is written to `osf-PLATFORM.rom` in the current directory.
 
 ## How to build the sample project
+
 * Clone the repo.
-* cd examples/qemu 
-* Run "./01.build.sh".
+* cd examples/qemu
+* Run `make`
+* Once the build is completed, run `make run`, it will start a VM with the OSF BIOS image.
+
+## Development tricks
+
+ * To speed up builds, when not actively working on initramfs or the kernel, pass `ALWAYS_BUILD_INITRAMFS=0` and `ALWAYS_BUILD_KERNEL=0` respectively.
+   * `make ALWAYS_BUILD_INITRAMFS=0 ALWAYS_BUILD_KERNEL=0` - for hacking on coreboot only.
+ * `make clean` will clean all the components without wiping the work done by `getdeps`.
+   * `make clean-coreboot` and `make clean-kernel` will clean just the coreboot and kernel components.
+ * `make wipe` will wipe everything, including downloaded deps.
+   * `make wipe-coreboot` and `make wipe-kernel` will clean just the coreboot and kernel components.
+   * Note that toolchain cache survives wipe and will be used in the next build.

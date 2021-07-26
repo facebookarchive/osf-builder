@@ -10,18 +10,20 @@ import (
 	"bytes"
 	"compress/gzip"
 	"errors"
+	"github.com/ulikunitz/xz"
 	"io"
 	"log"
 	"os"
-
-	"github.com/ulikunitz/xz"
+	"path/filepath"
+	"strings"
 )
 
 // Untar represents a tarball
 type Untar struct {
-	Label string `json:"label"`
-	URL   string `json:"url"`
-	Hash  string `json:"hash,omitempty"`
+	Label  string `json:"label"`
+	URL    string `json:"url"`
+	Hash   string `json:"hash,omitempty"`
+	Subdir string `json:"subdir,omitempty"`
 }
 
 // CompressionType is the type that defines compression types.
@@ -91,6 +93,8 @@ func (pkg *Untar) Get(projectDir string, urlOverrides *URLOverrides, hashMode Ha
 
 	// untar
 	tarReader := tar.NewReader(archive)
+	subdirParts := strings.Split(pkg.Subdir, "/")
+entry:
 	for {
 		header, err := tarReader.Next()
 		if err == io.EOF {
@@ -99,15 +103,35 @@ func (pkg *Untar) Get(projectDir string, urlOverrides *URLOverrides, hashMode Ha
 			return err
 		}
 
+		var name string
+		if len(pkg.Subdir) > 0 {
+			nameParts := strings.Split(header.Name, "/")
+			if len(nameParts) <= len(subdirParts) {
+				continue entry
+			}
+			for i, p := range subdirParts {
+				if nameParts[i] != p {
+					continue entry
+				}
+			}
+			name = filepath.Join(nameParts[len(subdirParts):]...)
+			if len(name) == 0 {
+				continue entry
+			}
+		} else {
+			name = header.Name
+		}
+
 		info := header.FileInfo()
+
 		if info.IsDir() {
-			if err = os.MkdirAll(header.Name, info.Mode()); err != nil {
+			if err = os.MkdirAll(name, info.Mode()); err != nil {
 				return err
 			}
 			continue
 		}
 
-		file, err := os.OpenFile(header.Name, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, info.Mode())
+		file, err := os.OpenFile(name, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, info.Mode())
 		if err != nil {
 			return err
 		}

@@ -51,10 +51,10 @@ var (
 			"update - zero out all the hashes in the beginning, update to whatever is found.")
 	flagComponents = flag.StringP("components", "C", "",
 		fmt.Sprintf("Comma-separated list of components to fetch. If empty or not specified, fetch all of them Supported components: %s", strings.Join(supportedComponents, ", ")))
-	flagConfigFile        = flag.StringP("config", "c", "config.json", "Configuration file")
-	flagURLOverridesFile  = flag.StringP("url-overrides", "u", "", "URL overrides file")
-	flagGeneratedVersions = flag.StringP("output", "o", "generated_versions.json", "Path to the generated versions file suitable for storing in the `internal_versions` VPD variable")
-	flagBaseDir           = flag.StringP("basedir", "d", "", "Base directory for relative includes. If unspecified, the current working directory is used for relative includes")
+	flagConfigFile       = flag.StringP("config", "c", "config.json", "Configuration file")
+	flagURLOverridesFile = flag.StringP("url-overrides", "u", "", "URL overrides file")
+	flagFinalConfigFile  = flag.StringP("output", "o", "", "Path to the output config file after all expansions, suitable for storing in the `internal_versions` VPD variable")
+	flagBaseDir          = flag.StringP("basedir", "d", "", "Base directory for relative includes. If unspecified, the current working directory is used for relative includes")
 )
 
 // HashMode represents the hash mode to use. See constants below.
@@ -107,7 +107,7 @@ func mergeFields(dst reflect.Value, src reflect.Value) {
 // specified directory, if any.
 func identifyRepo(dir string) (string, error) {
 	// Is it a Git repo?
-	cmd := exec.Command("git", "describe")
+	cmd := exec.Command("git", "describe", "--dirty", "--tags", "--always")
 	cmd.Dir = dir
 	if out, err := cmd.CombinedOutput(); err == nil {
 		return strings.TrimSpace(string(out)), nil
@@ -128,7 +128,6 @@ func getBuildID(configFile string, cwd string) string {
 			return id
 		}
 	}
-
 	// Next, try directory of the config.
 	if absConfigFilePath, err := filepath.Abs(configFile); err == nil {
 		if id, err := identifyRepo(filepath.Dir(absConfigFilePath)); err == nil {
@@ -264,17 +263,19 @@ func main() {
 		var component Component
 		switch componentName {
 		case "coreboot":
-			component = &config.Coreboot
+			component = config.Coreboot
 		case "kernel":
-			component = &config.Kernel
+			component = config.Kernel
 		case "initramfs":
-			component = &config.Initramfs
+			component = config.Initramfs
 		default:
 			// this should not happen, unless the switch cases are not kept in
 			// sync with the `supportedComponents` variable.
 			log.Fatalf("Unsupported component '%s'. This could be a bug, please report it to the maintainers", componentName)
 		}
 		workingDir := path.Join(projectDir, componentName)
+
+		log.Printf("Build ID: %s", buildID)
 
 		// clean up previous working directory
 		if err = os.RemoveAll(workingDir); err != nil {
@@ -302,13 +303,41 @@ func main() {
 	// patched. This will also expose fields that were not explicitly set
 	// in hand-written config files.
 	// If the file already exists, override only the portion that was processed.
-	generatedVersionsFile := filepath.Join(projectDir, *flagGeneratedVersions)
-	config.BuildID = buildID
-	indentedConfig, err := json.MarshalIndent(config, "", "  ")
-	if err != nil {
-		log.Fatalf("Failed to marshal configuration: %v", err)
-	}
-	if err := ioutil.WriteFile(generatedVersionsFile, indentedConfig, 0644); err != nil {
-		log.Fatalf("Failed to write generated versions to file '%s': %v", generatedVersionsFile, err)
+	finalConfigFile := *flagFinalConfigFile
+	if finalConfigFile != "" {
+		if !filepath.IsAbs(finalConfigFile) {
+			finalConfigFile = filepath.Join(projectDir, finalConfigFile)
+		}
+		act := "Wrote"
+		var finalConfig *Config
+		finalConfigData, err := ioutil.ReadFile(finalConfigFile)
+		if err == nil {
+			if fc, err := NewConfig(finalConfigData); err == nil {
+				finalConfig = fc
+				act = "Updated"
+			}
+		}
+		if finalConfig == nil {
+			finalConfig = &Config{}
+		}
+		finalConfig.BuildID = buildID
+		for _, componentName := range components {
+			switch componentName {
+			case "coreboot":
+				finalConfig.Coreboot = config.Coreboot
+			case "kernel":
+				finalConfig.Kernel = config.Kernel
+			case "initramfs":
+				finalConfig.Initramfs = config.Initramfs
+			}
+		}
+		indentedConfig, err := json.MarshalIndent(finalConfig, "", "  ")
+		if err != nil {
+			log.Fatalf("Failed to marshal configuration: %v", err)
+		}
+		if err := ioutil.WriteFile(finalConfigFile, indentedConfig, 0644); err != nil {
+			log.Fatalf("Failed to write generated versions to file '%s': %v", finalConfigFile, err)
+		}
+		log.Printf("%s %s", act, finalConfigFile)
 	}
 }

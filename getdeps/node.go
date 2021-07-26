@@ -14,7 +14,7 @@ type Node struct {
 	Git   []Git   `json:"git,omitempty"`
 	Goget []Gopkg `json:"goget,omitempty"`
 	Untar []Untar `json:"untar,omitempty"`
-	Files Files   `json:"files,omitempty"`
+	Files *Files  `json:"files,omitempty"`
 }
 
 // Get performs the specified actions.
@@ -37,8 +37,10 @@ func (n *Node) Get(projectDir string, urlOverrides *URLOverrides, hashMode HashM
 		}
 		n.Untar[i] = u
 	}
-	if err := n.Files.Get(projectDir, urlOverrides, hashMode); err != nil {
-		return fmt.Errorf("error processing %s entry: %w", "files", err)
+	if n.Files != nil {
+		if err := n.Files.Get(projectDir, urlOverrides, hashMode); err != nil {
+			return fmt.Errorf("error processing %s entry: %w", "files", err)
+		}
 	}
 	return nil
 }
@@ -116,7 +118,7 @@ func mergeNodes(base, patch *Node) (*Node, error) {
 		}
 	}
 
-	if len(patch.Files.Filelist) != 0 {
+	if patch.Files != nil {
 		ret.Files = patch.Files
 	}
 
