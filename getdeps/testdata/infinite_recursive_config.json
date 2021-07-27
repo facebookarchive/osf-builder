@@ -1,0 +1,5 @@
+{
+  "includes": [
+    "infinite_recursive_config.json"
+  ]
+}
