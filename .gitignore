@@ -1,0 +1,5 @@
+cmd/getdeps/getdeps
+generated_versions.json
+kernel
+initramfs
+coreboot
