@@ -1,0 +1,48 @@
+{
+  "coreboot": {
+    "git": [
+      {
+        "label": "coreboot",
+        "url": "https://review.coreboot.org/coreboot",
+        "branch": "master",
+        "hash": "HEAD"
+      }
+    ],
+    "files": {
+      "label": "crossgcc_tarballs",
+      "dest": "util/crossgcc/tarballs",
+      "filelist": [
+        {
+          "url": "https://ftpmirror.gnu.org/gmp/gmp-6.1.2.tar.xz",
+          "hash": "sha256:87b565e89a9a684fe4ebeeddb8399dce2599f9c9049854ca8c0dfbdea0e21912"
+        }
+      ]
+    }
+  },
+  "kernel": {
+    "untar": [
+      {
+        "label": "kernel",
+        "url": "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.9.12.tar.xz",
+        "hash": "sha256:d97f56192e3474c9c8a44ca39957d51800a26497c9a13c9c5e8cc0f1f5b0d9bd"
+      }
+    ]
+  },
+  "initramfs": {
+    "untar": [
+      {
+        "label": "go",
+        "url": "https://golang.org/dl/go1.15.linux-amd64.tar.gz",
+        "hash": "sha256:2d75848ac606061efe52a8068d0e647b35ce487a15bb52272c427df485193602"
+      }
+    ],
+    "goget": [
+      {
+        "label": "uroot",
+        "pkg": "https://github.com/u-root/u-root",
+        "branch": "master",
+        "hash": "60aeb0ab57dfac6e19f057de0b3e25793ede1616"
+      }
+    ]
+  }
+}

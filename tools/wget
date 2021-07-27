@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+# Replacement for wget to track external dependencies during toolchain build.
+# Wget does not support cert authentication for proxies.
+# This wrapper replaces wget with curl + required proxy settings to work on a devvm.
+
+set -e
+
+# Fool the presence check performed by buildgcc.
+if [ "$1" = "--version" ]; then
+  echo "GNU Wget 11.22.33"
+  exit 1
+fi
+
+# Command is invoked with variable number of arguments but URL is always the last.
+URL="${*: -1}"
+
+# Collect dependencies that had to be fetched during build.
+if [ -n "${EXTERNAL_DEPS_FILE}" ]; then
+  echo -n "$URL " >> "${EXTERNAL_DEPS_FILE}"
+fi
+
+# If not building under Buck or fetching an internal URL, proceed.
+if [ -z "${BUCK_BUILD_ID}" ] || [ "${URL:0:12}" = "https://yum/" ]; then
+  exec curl --location -O "${URL}"
+fi
+
+if [ "${USE_FWDPROXY}" = "1" ]; then
+  # Note: We do actually want to inject args returned by fwdproxy-config hence the suppression.
+  # shellcheck disable=SC2046
+  curl --location -O $(fwdproxy-config curl) -m 20 "${URL}"
+  if [ -n "${EXTERNAL_DEPS_FILE}" ]; then
+    sha256sum "$(basename "$URL")" | awk '{print $1}' >> "${EXTERNAL_DEPS_FILE}"
+  fi
+else
+  echo "=== ERROR: External resource requested (${URL})" >&2
+  exit 1
+fi

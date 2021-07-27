@@ -1,0 +1,18 @@
+load("//libfb/go:defs.bzl", "go_package")
+
+go_package(
+    name = "getdeps",
+    cgo = False,
+    main = True,
+    resources = ["testdata"],
+    test_external_deps = [
+        "github.com/stretchr/testify/assert",
+        "github.com/stretchr/testify/require",
+    ],
+    deps = [
+    ],
+    external_deps = [
+        "github.com/spf13/pflag",
+        "github.com/ulikunitz/xz",
+    ],
+)
