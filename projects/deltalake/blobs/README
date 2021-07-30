@@ -1,0 +1,5 @@
+Please put all the Intel blobs into this folder.
+FSP: Server_T.fd, Server_M.fd, Server_S.fd
+microcode: microcode.mcb
+Intel flash descriptor and PCH IGN firmware: flashregion_0_flashdescriptor.bin flashregion_2_intel_me.bin
+
