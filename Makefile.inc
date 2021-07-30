@@ -154,6 +154,9 @@ $(ROM_OUT): $(COREBOOT_OUT)
 	cp $(COREBOOT_OUT) $(ROM_OUT)
 	$(VPD_TOOL) -f "$@" -O -i RO_VPD -s internal_versions="`cat $(FINAL_CONFIG_OUT)`"
 	[ -z "$(VERSION)" ] || $(VPD_TOOL) -f "$@" -i RO_VPD -s firmware_version=$(VERSION)
+	if [ "$(PLATFORM)" != "qemu-x86_64" ]; then \
+	  $(VPD_TOOL) -f "$@" -O -i RW_VPD; \
+	fi
 	@echo '***' >&2
 	@echo '*** Build done, $@' >&2
 	@echo '***' >&2
