@@ -89,6 +89,16 @@ COREBOOT_DEPS_FLAG := $(PLATFORM_BUILD_DIR)/.coreboot-deps
 COREBOOT_PATCH_FLAG := $(PLATFORM_BUILD_DIR)/.coreboot-patch
 COREBOOT_TOOLCHAIN_FLAG := $(PLATFORM_BUILD_DIR)/.coreboot-toolchain
 COREBOOT_TOOLCHAIN_CACHE_ENABLE ?= 1
+# coreboot Intel blobs
+ifdef COREBOOT_BLOBS_DIR
+COREBOOT_BLOBS_DIR := $(realpath $(COREBOOT_BLOBS_DIR))
+COREBOOT_FSP_T := $(COREBOOT_BLOBS_DIR)/Server_T.fd
+COREBOOT_FSP_M := $(COREBOOT_BLOBS_DIR)/Server_M.fd
+COREBOOT_FSP_S := $(COREBOOT_BLOBS_DIR)/Server_S.fd
+COREBOOT_UCODE := $(COREBOOT_BLOBS_DIR)/microcode.mcb
+COREBOOT_IFD := $(COREBOOT_BLOBS_DIR)/flashregion_0_flashdescriptor.bin
+COREBOOT_IGN := $(COREBOOT_BLOBS_DIR)/flashregion_2_intel_me.bin
+endif
 
 UROOT_BASE_CMDS ?= \
 	boot/fbnetboot \
@@ -214,6 +224,15 @@ $(COREBOOT_TOOLCHAIN_OUT)/bin/iasl: $(COREBOOT_DEPS_FLAG) $(COREBOOT_PATCH_FLAG)
 # Creates coreboot config file using the user-provided one and feeding it to make olddefconfig.
 $(COREBOOT_CONFIG_OUT): $(COREBOOT_CONFIG) $(COREBOOT_DEPS_FLAG) $(COREBOOT_TOOLCHAIN_FLAG)
 	cp $(COREBOOT_CONFIG) $(COREBOOT_CONFIG_OUT)
+	if [ -d "$(COREBOOT_BLOBS_DIR)" ]; then \
+	  echo Using provided coreboot Intel blobs FSP, ME and microcode from $(COREBOOT_BLOBS_DIR) >&2; \
+	  sed -i "s|CONFIG_CPU_UCODE_BINARIES=.*|CONFIG_CPU_UCODE_BINARIES=\"$(COREBOOT_UCODE)\"|" $@; \
+	  sed -i "s|CONFIG_FSP_T_FILE=.*|CONFIG_FSP_T_FILE=\"$(COREBOOT_FSP_T)\"|" $@; \
+	  sed -i "s|CONFIG_FSP_M_FILE=.*|CONFIG_FSP_M_FILE=\"$(COREBOOT_FSP_M)\"|" $@; \
+	  sed -i "s|CONFIG_FSP_S_FILE=.*|CONFIG_FSP_S_FILE=\"$(COREBOOT_FSP_S)\"|" $@; \
+	  sed -i "s|CONFIG_IFD_BIN_PATH=.*|CONFIG_IFD_BIN_PATH=\"$(COREBOOT_IFD)\"|" $@; \
+	  sed -i "s|CONFIG_ME_BIN_PATH=.*|CONFIG_ME_BIN_PATH=\"$(COREBOOT_IGN)\"|" $@; \
+	fi
 	sed -i "s|CONFIG_PAYLOAD_FILE=.*|CONFIG_PAYLOAD_FILE=\"$(KERNEL_IN)\"|" $@
 	! grep -q CONFIG_INTEL_CBNT_PROV_EXTERNAL_BIN=y $@ || \
 	  sed -i "s|CONFIG_INTEL_CBNT_PROV_EXTERNAL_BIN_PATH=.*|CONFIG_INTEL_CBNT_PROV_EXTERNAL_BIN_PATH=\"$(CBNT_PROV_TOOL)\"|" $@
