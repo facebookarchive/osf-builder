@@ -50,6 +50,7 @@ ALWAYS_BUILD_INITRAMFS ?= 1
 # Same for the kernel and coreboot.
 ALWAYS_BUILD_KERNEL ?= 1
 ALWAYS_BUILD_COREBOOT ?= 1
+_WIPE_CONFIRMED ?= 0
 
 ALL_CONFIGS := $(wildcard $(CONFIGS_DIR)/*.json)
 DEFAULT_GETDEPS_TOOL ?= $(PLATFORM_BUILD_DIR)/getdeps
@@ -319,6 +320,16 @@ $(DEFAULT_GETDEPS_TOOL): $(wildcard $(OSF_BUILDER_DIR)/getdeps/*.go)
 # Run the getdeps tool for a component (initramfs, kernel, coreboot) and create a flag file.
 # The flag file is used to avoid re-running unless JSON configs have changed.
 $(PLATFORM_BUILD_DIR)/.%-deps: $(CONFIG) $(GETDEPS_TOOL) $(ALL_CONFIGS)
+	@if [ -f "$@" -a $(_WIPE_CONFIRMED) -eq 0 ]; then \
+	  echo "WARNING: A full wipe is being triggered, it will delete all the downloaded code under $(PLATFORM_BUILD_DIR), are you sure to continue? (y/n)"; \
+	  read ans; \
+	  if [ "$$ans" = "y" ]; then \
+	    echo continue; \
+	  else \
+	    echo exit 1; exit 1; \
+	  fi \
+	fi
+	$(eval _WIPE_CONFIRMED=1)
 	mkdir -p $(PLATFORM_BUILD_DIR)
 	cd $(PLATFORM_BUILD_DIR) && $(GETDEPS_TOOL) --components $* -c $(CONFIG) -H $(HASH_MODE) --url-overrides=$(URL_OVERRIDES_ABS) -o $(FINAL_CONFIG_OUT)
 	touch $@
