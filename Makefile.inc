@@ -334,7 +334,7 @@ $(DEFAULT_GETDEPS_TOOL): $(wildcard $(OSF_BUILDER_DIR)/getdeps/*.go)
 # The flag file is used to avoid re-running unless JSON configs have changed.
 $(PLATFORM_BUILD_DIR)/.%-deps: $(CONFIG) $(GETDEPS_TOOL) $(ALL_CONFIGS)
 	@if [ -f "$@" -a $(_WIPE_CONFIRMED) -eq 0 ]; then \
-	  echo "WARNING: A full wipe is being triggered, it will delete all the downloaded code under $(PLATFORM_BUILD_DIR), are you sure to continue? (y/n)"; \
+	  echo "WARNING: A full wipe is being triggered, it will remove build artifacts and git repos under $(PLATFORM_BUILD_DIR), are you sure to continue? (y/n)"; \
 	  read ans; \
 	  if [ "$$ans" = "y" ]; then \
 	    echo continue; \
